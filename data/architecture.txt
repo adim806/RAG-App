@@ -1,0 +1,47 @@
+SYSTEM ARCHITECTURE — DevMind Platform
+
+OVERVIEW
+The DevMind platform is built on a microservices architecture deployed on AWS using Kubernetes (EKS).
+Each service owns its own data store and communicates through well-defined API contracts and an async message bus.
+The system is designed for high availability with multi-AZ deployments and automatic failover.
+
+SERVICES
+The API Gateway service (nginx + custom Lua plugins) handles authentication, rate limiting, and request routing.
+The Identity Service manages user accounts, authentication tokens, and permissions (PostgreSQL).
+The Session Service manages chat sessions and persists conversation history (PostgreSQL + Redis cache).
+The RAG Service handles document ingestion, embedding, FAISS indexing, and LLM orchestration (Python/FastAPI).
+The Notification Service sends email and Slack alerts for system events (RabbitMQ consumer).
+The Analytics Service collects usage metrics and generates dashboards (ClickHouse).
+
+FRONTEND
+The web application is built with Next.js 14 using the App Router and React Server Components.
+Styling uses Tailwind CSS with a custom design token system defined in tokens.json.
+State management uses Zustand for client-side state and React Query for server-state caching.
+The frontend communicates with the backend exclusively through the API Gateway.
+
+DATA STORES
+PostgreSQL 15 is the primary relational database. All services use separate schemas or separate instances.
+Redis 7 is used for session caching, rate limiting counters, and pub/sub for real-time features.
+FAISS indexes are stored on EFS (Elastic File System) and loaded into memory at service startup.
+RabbitMQ handles async job queues for embedding generation, notification delivery, and report generation.
+S3 is used for storing uploaded documents, exported reports, and build artifacts.
+
+DEPLOYMENT AND CI/CD
+Every merge to develop triggers a build pipeline in GitHub Actions.
+The pipeline runs: lint, unit tests, integration tests, Docker image build, push to ECR, deploy to staging.
+Staging deployments use Helm charts with environment-specific values in helm/values-staging.yaml.
+Production deployments are triggered manually after QA sign-off, using the same Helm chart with values-prod.yaml.
+Blue/green deployments are used for zero-downtime releases. Traffic shifts via weighted ALB target groups.
+
+OBSERVABILITY
+Metrics are collected by Prometheus and visualized in Grafana dashboards (dashboards/grafana/).
+Distributed tracing uses OpenTelemetry with Jaeger as the backend.
+Logs are shipped to CloudWatch Logs and indexed in OpenSearch for full-text search.
+Alerts are defined in AlertManager and routed to PagerDuty for on-call engineers.
+SLO targets: 99.9% availability, p99 latency under 500ms for all API endpoints.
+
+SECURITY
+All inter-service communication uses mutual TLS (mTLS) via Istio service mesh.
+Secrets are stored in AWS Secrets Manager and injected as environment variables at runtime.
+Security scans run on every PR using Snyk for dependency vulnerabilities and Semgrep for code patterns.
+Penetration testing is conducted quarterly by an external security firm.

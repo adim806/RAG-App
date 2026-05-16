@@ -1,0 +1,38 @@
+TESTING POLICY — DevMind Engineering
+
+All production code must be accompanied by tests. Code without tests will not be approved for merging.
+Minimum unit test coverage is 80% per module. The overall project coverage gate is 85%.
+Coverage is measured using pytest-cov in Python and Istanbul/c8 in JavaScript/TypeScript.
+Coverage reports are generated on every CI run and published to the team dashboard.
+
+Test types and when to write them:
+- Unit tests: test every function and class method in isolation using mocks for all external dependencies.
+- Integration tests: test the interaction between two or more real components (e.g. route handler + database).
+- End-to-end tests: test complete user flows from the browser or API client. Required for all critical paths.
+- Contract tests: verify that service API contracts are maintained when dependencies are updated.
+
+Test file naming convention:
+- Python: test_<module_name>.py placed in the tests/ directory mirroring the source structure.
+- JavaScript/TypeScript: <module>.test.ts placed alongside the source file.
+
+Test function naming convention: test_<method>_<scenario>_<expected_result>
+Example: test_login_with_invalid_password_returns_401
+Example: test_create_session_with_empty_title_uses_default
+
+All external services (databases, HTTP APIs, message queues) must be mocked in unit tests.
+Use pytest fixtures for shared setup. Do not use setUp/tearDown-style classes for new tests.
+Test data must be created fresh for each test case. Do not share mutable state between tests.
+Tests must not depend on execution order.
+
+Use factory functions or builder patterns to generate test data, never hardcode raw JSON in test bodies.
+Secrets and environment-specific values must be provided via environment variables, never hardcoded.
+
+Flaky tests are treated as bugs. If a test fails intermittently, it must be fixed or quarantined immediately.
+Quarantined tests must have a JIRA ticket linked in a comment and be resolved within one sprint.
+
+Performance tests run weekly on the staging environment using Locust.
+Any endpoint that regresses by more than 20% p99 latency triggers a required performance investigation.
+
+The CI pipeline runs unit and integration tests on every pull request.
+End-to-end tests run on merges to develop and before every release.
+All tests must complete within 5 minutes in CI; slow tests must be parallelized or optimized.

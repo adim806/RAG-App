@@ -1,0 +1,23 @@
+# DevMind — Python dependencies
+# Install with:  pip install -r requirements.txt
+
+# Web framework
+flask>=3.0.0
+
+# Google Gemini SDK
+google-genai>=1.0.0
+
+# HuggingFace cloud embeddings
+huggingface-hub>=0.23.0
+
+# Vector search
+faiss-cpu>=1.7.4
+
+# Numerical computing (required by FAISS + embeddings)
+numpy>=1.26.0
+
+# Natural language tokenizer (sentence splitting)
+nltk>=3.8.1
+
+# Testing
+pytest>=8.0.0

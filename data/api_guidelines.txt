@@ -1,0 +1,49 @@
+REST API GUIDELINES — DevMind Engineering
+
+All public API endpoints must be versioned under /api/v1/.
+Breaking changes require a new version prefix, e.g. /api/v2/.
+Non-breaking additions (new optional fields, new endpoints) do not require a version bump.
+
+Resource naming uses lowercase plural nouns: /api/v1/sessions, /api/v1/messages, /api/v1/users.
+Avoid verbs in URLs. Use HTTP methods to express actions.
+Nested resources are acceptable up to one level: /api/v1/sessions/{id}/messages.
+Beyond one level of nesting, return a flat resource with foreign key references.
+
+HTTP method semantics:
+- GET: retrieve a resource or list, must be idempotent and safe.
+- POST: create a resource or trigger an action.
+- PUT: replace a resource in full.
+- PATCH: partially update a resource.
+- DELETE: remove a resource.
+
+All responses must be JSON with Content-Type: application/json.
+Success response envelope: {"data": <payload>, "meta": <optional metadata>}
+Error response envelope: {"error": {"code": "<string>", "message": "<human-readable>", "details": <optional>}}
+
+Standard HTTP status codes:
+- 200 OK for successful GET, PUT, PATCH.
+- 201 Created for successful POST that creates a resource.
+- 204 No Content for successful DELETE.
+- 400 Bad Request for validation errors.
+- 401 Unauthorized for missing or invalid authentication.
+- 403 Forbidden for authenticated but unauthorized access.
+- 404 Not Found for missing resources.
+- 409 Conflict for state conflicts (duplicate creation).
+- 422 Unprocessable Entity for semantic validation failures.
+- 429 Too Many Requests for rate limiting.
+- 500 Internal Server Error for unexpected server failures.
+
+Authentication uses Bearer JWT tokens passed in the Authorization header.
+Tokens expire after 1 hour. Refresh tokens expire after 30 days.
+All authenticated endpoints must validate the token on every request.
+
+Rate limiting is applied per API key: 1000 requests per hour for standard tier, 10000 for premium.
+Rate limit headers must be included in every response: X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset.
+
+All list endpoints must support pagination via page and page_size query parameters.
+Default page size is 20. Maximum page size is 100.
+Paginated responses include meta: {"page": 1, "page_size": 20, "total": 150}.
+
+Input validation must reject unexpected fields (strict mode).
+All string inputs must be trimmed and length-validated.
+IDs must be validated as UUID format or the appropriate format for the resource.

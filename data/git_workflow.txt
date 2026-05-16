@@ -1,0 +1,38 @@
+GIT WORKFLOW — DevMind Engineering
+
+The primary protected branches are main and develop. Direct pushes to either branch are blocked.
+All feature work happens on short-lived branches created from develop.
+All hotfixes are branched from main and merged back into both main and develop.
+
+Branch naming convention:
+- Feature branches: feature/JIRA-123-short-description
+- Bug fix branches: fix/JIRA-456-what-is-broken
+- Hotfix branches: hotfix/JIRA-789-critical-issue
+- Release branches: release/1.4.0
+- Chore branches: chore/update-dependencies
+
+Commit messages must follow the Conventional Commits specification.
+Format: <type>(<scope>): <short summary in imperative mood>
+Valid types: feat, fix, docs, style, refactor, test, chore, build, ci, perf.
+Example: feat(auth): add JWT refresh token rotation
+Example: fix(api): handle null session_id in /ask endpoint
+
+Every commit must reference a JIRA ticket number in the footer when applicable.
+Footer format: Refs: JIRA-123 or Fixes: JIRA-456
+
+Pull request requirements:
+- At least 2 approvals from team members (one must be a senior engineer).
+- All CI checks must pass (lint, tests, build, security scan).
+- No unresolved review comments.
+- Branch must be up-to-date with develop before merging.
+- PR description must include: What changed, Why it changed, and How to test.
+
+Use squash-and-merge strategy for feature and fix branches to keep the develop history linear.
+Use merge commits for release and hotfix branches to preserve the branch point.
+
+Delete source branches immediately after merging.
+Never force-push to develop or main.
+Rebase your feature branch on top of develop before opening a PR if the branch is more than 3 days old.
+
+Tags follow semantic versioning: v1.0.0, v1.1.0, v2.0.0.
+Only release engineers may create and push tags.

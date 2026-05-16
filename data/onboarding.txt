@@ -1,0 +1,46 @@
+DEVELOPER ONBOARDING GUIDE — DevMind Engineering
+
+Welcome to the DevMind engineering team. This guide walks you through everything you need to get your development environment running and make your first contribution.
+
+PREREQUISITES
+Install the following tools before cloning the repository:
+- Python 3.11 or higher (use pyenv to manage Python versions)
+- Node.js 20 LTS and npm 10+ (use nvm to manage Node versions)
+- Docker Desktop 4.x (required for running local services)
+- Git 2.40+ with GPG signing configured
+- VS Code with the DevMind recommended extension pack (devmind.extensions)
+
+REPOSITORY ACCESS
+Request access to the devmind GitHub organization from your engineering manager.
+Enable two-factor authentication on your GitHub account before access is granted.
+Clone the main repository: git clone git@github.com:devmind/platform.git
+Set up your SSH key and add it to your GitHub account if you haven't already.
+
+ENVIRONMENT SETUP
+Copy the environment template: cp .env.example .env
+Fill in your personal API keys and local database credentials in .env.
+Never commit the .env file. It is listed in .gitignore.
+Install Python dependencies: pip install -r requirements.txt
+Install development extras: pip install -r requirements-dev.txt
+Install pre-commit hooks: pre-commit install
+Install JavaScript dependencies: npm install
+
+RUNNING LOCALLY
+Start local infrastructure: docker compose up -d (starts PostgreSQL, Redis, and RabbitMQ)
+Run database migrations: python manage.py migrate
+Start the backend API: python run.py (runs on http://localhost:5000)
+Start the frontend dev server: npm run dev (runs on http://localhost:3000)
+Access the local admin panel at http://localhost:5000/admin (credentials in .env)
+
+FIRST WEEK CHECKLIST
+Day 1: Set up your environment and run the test suite: pytest (all tests must pass).
+Day 2: Read the architecture overview in docs/architecture.md and ask your buddy any questions.
+Day 3: Pick your first onboarding ticket from the JIRA board (labeled onboarding-good-first-issue).
+Day 4-5: Implement the ticket with pair-programming support from your assigned buddy.
+Week 2: Participate in code review as both author and reviewer.
+
+TEAM PRACTICES
+Daily standups are at 9:30 AM. Share what you did yesterday, what you are doing today, and any blockers.
+Sprint planning happens every two weeks on Monday. Retrospectives are on Friday before planning.
+All design decisions that affect more than one team must go through the RFC process (docs/rfc-process.md).
+Ask questions in the #engineering Slack channel. No question is too basic.

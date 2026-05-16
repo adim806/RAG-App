@@ -1,0 +1,27 @@
+CODING STANDARDS — DevMind Engineering
+
+All Python code must follow PEP 8 style guidelines and be formatted with Black (line length 88).
+JavaScript and TypeScript files must pass ESLint using our shared config at eslint-config-devmind.
+Use snake_case for Python variables, functions, and module names.
+Use camelCase for JavaScript and TypeScript variables and function names.
+Use PascalCase for class names in all languages.
+Use UPPER_SNAKE_CASE for module-level constants.
+
+Function length must not exceed 50 lines. If a function grows beyond this, refactor it into smaller helpers.
+Class files should not exceed 300 lines. Split large classes using composition or mixins.
+Every public function and class must have a docstring explaining purpose, arguments, and return type.
+Type hints are mandatory for all Python function signatures from Python 3.10 onward.
+
+Avoid deeply nested logic. Maximum nesting depth is 3 levels. Use early returns to flatten control flow.
+Never use bare except clauses. Always catch specific exception types.
+Do not suppress exceptions silently. Log them or re-raise with context.
+
+Import ordering follows isort conventions: standard library first, third-party second, local last.
+Circular imports are forbidden. Refactor shared logic into a utils module to break cycles.
+Dead code (unreachable statements, unused imports, commented-out blocks) must be removed before merging.
+
+String formatting must use f-strings in Python 3.6+. Do not use % formatting or str.format() for new code.
+Magic numbers must be replaced by named constants defined at module level or in a config file.
+
+All files must end with a single trailing newline character.
+Tabs are forbidden. Use 4 spaces for Python indentation and 2 spaces for JavaScript/TypeScript.
