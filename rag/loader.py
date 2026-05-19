@@ -3,15 +3,20 @@ Document loading and chunking for the DevMind RAG pipeline.
 
 Functions
 ---------
-setup_nltk        -- download required NLTK tokenizer data
-load_documents    -- load .txt files → (chunks, sources) split by sentence
-chunk_by_section  -- alternative chunking that splits on section headers
+setup_nltk            -- download required NLTK tokenizer data
+extract_text_from_pdf -- extract plain text from a PDF file
+load_documents        -- load .txt/.pdf files → (chunks, sources) split by sentence
+chunk_by_section      -- alternative chunking that splits on section headers
 """
 
 import os
+import re
 
+import fitz  # PyMuPDF
 import nltk
 from nltk.tokenize import sent_tokenize
+
+SUPPORTED_EXTENSIONS = (".txt", ".pdf")
 
 # Resolve data folder relative to the project root (one level above this package)
 DATA_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
@@ -28,12 +33,36 @@ def setup_nltk() -> None:
 
 
 # ------------------------------------------------------------------
+# PDF TEXT EXTRACTION
+# ------------------------------------------------------------------
+
+def extract_text_from_pdf(file_path: str) -> str:
+    """
+    Extract plain text from a PDF file using PyMuPDF.
+
+    Performs basic clean-up: collapses runs of whitespace and removes
+    isolated page-number lines so they don't pollute chunking.
+    """
+    doc = fitz.open(file_path)
+    pages: list[str] = []
+    for page in doc:
+        pages.append(page.get_text())
+    doc.close()
+
+    text = "\n".join(pages)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    text = re.sub(r"^\s*\d+\s*$", "", text, flags=re.MULTILINE)
+    return text.strip()
+
+
+# ------------------------------------------------------------------
 # DOCUMENT LOADING
 # ------------------------------------------------------------------
 
 def load_documents(folder: str = DATA_FOLDER) -> tuple[list[str], list[str]]:
     """
-    Load every .txt file from *folder* and split each file into sentences.
+    Load every supported file (.txt, .pdf) from *folder* and split each
+    file into sentences.
 
     Files are processed in sorted order so the index is deterministic across
     runs on the same data set.
@@ -51,19 +80,22 @@ def load_documents(folder: str = DATA_FOLDER) -> tuple[list[str], list[str]]:
     if not os.path.exists(folder):
         raise FileNotFoundError(
             f"Folder '{folder}' does not exist. "
-            "Create it and add .txt files before starting the engine."
+            "Create it and add .txt or .pdf files before starting the engine."
         )
 
     chunks: list[str] = []
     sources: list[str] = []
 
     for file_name in sorted(os.listdir(folder)):
-        if not file_name.endswith(".txt"):
-            continue
-
         file_path = os.path.join(folder, file_name)
-        with open(file_path, "r", encoding="utf-8") as fh:
-            text = fh.read()
+
+        if file_name.endswith(".txt"):
+            with open(file_path, "r", encoding="utf-8") as fh:
+                text = fh.read()
+        elif file_name.endswith(".pdf"):
+            text = extract_text_from_pdf(file_path)
+        else:
+            continue
 
         for sentence in sent_tokenize(text):
             sentence = sentence.strip()
@@ -73,7 +105,8 @@ def load_documents(folder: str = DATA_FOLDER) -> tuple[list[str], list[str]]:
 
     if not chunks:
         raise ValueError(
-            f"No text found. Make sure '{folder}' contains .txt files with content."
+            f"No text found. Make sure '{folder}' contains "
+            f"supported files ({', '.join(SUPPORTED_EXTENSIONS)}) with content."
         )
 
     return chunks, sources
@@ -111,12 +144,15 @@ def chunk_by_section(
     sources: list[str] = []
 
     for file_name in sorted(os.listdir(folder)):
-        if not file_name.endswith(".txt"):
-            continue
-
         file_path = os.path.join(folder, file_name)
-        with open(file_path, "r", encoding="utf-8") as fh:
-            text = fh.read()
+
+        if file_name.endswith(".txt"):
+            with open(file_path, "r", encoding="utf-8") as fh:
+                text = fh.read()
+        elif file_name.endswith(".pdf"):
+            text = extract_text_from_pdf(file_path)
+        else:
+            continue
 
         current_lines: list[str] = []
         for raw_line in text.splitlines():

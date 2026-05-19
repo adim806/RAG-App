@@ -13,16 +13,20 @@ embed_texts                         -- batch-embed a list of strings
 embed_query                         -- embed a single query string
 """
 
+import os
 import time
 
 import numpy as np
+from dotenv import load_dotenv
 from huggingface_hub import InferenceClient
+
+load_dotenv()
 
 # ------------------------------------------------------------------
 # CONFIGURATION
 # ------------------------------------------------------------------
 
-HF_TOKEN = "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"
+HF_TOKEN = os.environ.get("HF_TOKEN", "")
 HF_EMBEDDING_MODEL = "ibm-granite/granite-embedding-97m-multilingual-r2"
 BATCH_SIZE = 8
 

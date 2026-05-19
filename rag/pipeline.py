@@ -10,8 +10,10 @@ Classes
 RAGEngine -- initialise once at startup; call .answer() per user question
 """
 
+import os
 import threading
 
+from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
@@ -19,11 +21,13 @@ from rag.embedder import BATCH_SIZE, create_hf_client, embed_texts
 from rag.indexer import TOP_K, create_faiss_index, retrieve
 from rag.loader import DATA_FOLDER, load_documents, setup_nltk
 
+load_dotenv()
+
 # ------------------------------------------------------------------
 # CONFIGURATION
 # ------------------------------------------------------------------
 
-GEMINI_API_KEY = "AIzaSyAJu5plYDuu2GGvLRJzx5z5RZzfHKGs-JQ"
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_MODEL = "gemini-3-flash-preview"
 
 
@@ -177,11 +181,11 @@ Use the provided context and the previous conversation to answer the user's
 latest question.
 
 Rules:
-1. First answer using only the provided context.
-2. If the context does not contain enough information, say:
-   "I do not have enough information in the documents, but based on general knowledge..."
+1. Answer using ONLY the provided context. Do NOT use general knowledge.
+2. If the context does not contain enough information, reply EXACTLY:
+   "I don't have enough information in the internal documents to answer this question."
 3. Keep the answer simple and clear.
-4. Do not invent facts from the documents.
+4. Do not invent or assume facts that are not explicitly stated in the context.
 5. Use the conversation history only to resolve references like "it" or
    "the previous one" — never invent earlier turns.
 

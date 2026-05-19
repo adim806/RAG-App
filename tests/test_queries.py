@@ -236,3 +236,46 @@ def test_multi_turn_history(engine: RAGEngine):
     print(f"  Q: {question}")
     print(f"  A: {result['answer'][:300]}")
     print(f"  Sources: {[c['source'] for c in result['context']]}")
+
+
+# ==================================================================
+# TEST 8 — Irrelevant question (out-of-domain)
+# ==================================================================
+
+def test_irrelevant_question(engine: RAGEngine):
+    """
+    Question : What is the capital of France?
+    Expected : The system should indicate it does not have enough
+               information in the internal documents to answer, rather
+               than hallucinating from general knowledge.
+    """
+    question = "What is the capital of France?"
+    result   = engine.answer(question)
+
+    answer  = result["answer"].lower()
+    context = result["context"]
+
+    assert answer, "Answer must not be empty"
+
+    not_in_docs_phrases = [
+        "don't have enough information",
+        "do not have enough information",
+        "not in the internal documents",
+        "no relevant information",
+        "not covered",
+        "outside the scope",
+        "cannot find",
+        "no information",
+    ]
+    has_disclaimer = any(phrase in answer for phrase in not_in_docs_phrases)
+
+    assert has_disclaimer or len(context) == 0, (
+        "Expected the model to refuse or indicate lack of information for "
+        f"an out-of-domain question.\nGot: {result['answer']}"
+    )
+
+    print("\n[TEST 8] Irrelevant question (out-of-domain)")
+    print(f"  Q: {question}")
+    print(f"  A: {result['answer'][:300]}")
+    print(f"  Sources: {[c['source'] for c in context]}")
+    print(f"  Context count: {len(context)} (0 means threshold filtered all)")

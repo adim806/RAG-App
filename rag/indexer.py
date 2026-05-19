@@ -18,6 +18,7 @@ from rag.embedder import embed_query
 # ------------------------------------------------------------------
 
 TOP_K = 3
+MIN_SCORE = 0.3
 
 
 # ------------------------------------------------------------------
@@ -57,9 +58,11 @@ def retrieve(
     hf_client: InferenceClient,
     query: str,
     k: int = TOP_K,
+    min_score: float = MIN_SCORE,
 ) -> list[dict]:
     """
-    Embed *query*, search *index*, and return the top-k matching chunks.
+    Embed *query*, search *index*, and return the top-k matching chunks
+    whose cosine-similarity score meets the *min_score* threshold.
 
     The query vector is L2-normalised to match the normalisation applied
     during index construction, making scores interpretable as cosine
@@ -73,6 +76,7 @@ def retrieve(
     hf_client : HuggingFace InferenceClient used for query embedding
     query     : the user's natural-language question
     k         : number of results to return
+    min_score : minimum cosine-similarity score; results below this are discarded
 
     Returns
     -------
@@ -89,6 +93,8 @@ def retrieve(
     results: list[dict] = []
     for score, idx in zip(scores[0], indexes[0]):
         if idx == -1:
+            continue
+        if float(score) < min_score:
             continue
         results.append(
             {
