@@ -48,12 +48,14 @@ User ──▶ Flask Web UI ──▶ POST /api/ask
 | LLM | Google Gemini (`gemini-3-flash-preview`) |
 | Conversation store | SQLite |
 | Sentence tokenizer | NLTK (`sent_tokenize`) |
+| PDF text extraction | PyMuPDF (`fitz`) |
+| Containerisation | Docker |
 
 ## Data Source
 
-The knowledge base consists of **6 curated text documents** stored in the
-`data/` directory.  They simulate a realistic set of internal engineering docs
-for a fictional company called "DevMind":
+The knowledge base consists of **7 documents** (6 text files + 1 PDF) stored in
+the `data/` directory.  They simulate a realistic set of internal engineering
+docs for a fictional company called "DevMind":
 
 | File | Content |
 |------|---------|
@@ -63,9 +65,11 @@ for a fictional company called "DevMind":
 | `git_workflow.txt` | Branch naming, Conventional Commits, PR requirements, merge strategies |
 | `onboarding.txt` | Prerequisites, environment setup, first-week checklist, team practices |
 | `testing_policy.txt` | Coverage requirements, test types, naming conventions, flaky-test policy |
+| `devmind_security_guidelines.pdf` | Password hashing, JWT storage, input validation, encryption, audit logging |
 
 These documents were written to be factually consistent and internally
-cross-referenced, providing a realistic corpus for semantic retrieval.
+cross-referenced, providing a realistic corpus for semantic retrieval.  The PDF
+file demonstrates that the system supports multiple document formats.
 
 ## Chunking Strategy
 
@@ -160,12 +164,41 @@ Embeddings are generated in **batches of 8** with exponential-backoff retries
 
 ## Installation & Running
 
-### Prerequisites
+### Option A — Docker (recommended)
+
+The easiest way to run the application.  Only **Docker** and an internet
+connection are required.
+
+```bash
+cd RAG-App
+
+# 1. Build the image
+docker build -t devmind-rag .
+
+# 2. Run the container (pass API keys via .env)
+docker run -d --name devmind -p 5000:5000 --env-file .env devmind-rag
+```
+
+Open **http://localhost:5000** in your browser.  The knowledge base embedding
+takes ~1-2 minutes on first launch; a loading overlay shows progress.
+
+Useful Docker commands:
+
+```bash
+docker logs -f devmind       # watch logs in real time
+docker stop devmind           # stop the container
+docker start devmind          # restart the container
+docker rm -f devmind          # remove and re-create if needed
+```
+
+### Option B — Local Python
+
+#### Prerequisites
 
 - Python 3.11+
 - Internet connection (for HuggingFace and Gemini API calls)
 
-### Setup
+#### Setup
 
 ```bash
 cd RAG-App
@@ -180,12 +213,12 @@ source .venv/bin/activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Configure API keys
-cp .env.example .env
-# Edit .env and fill in your HF_TOKEN and GEMINI_API_KEY
+# Configure API keys — create a .env file with:
+#   HF_TOKEN=your_huggingface_token
+#   GEMINI_API_KEY=your_gemini_api_key
 ```
 
-### Running the Application
+#### Running the Application
 
 ```bash
 python run.py
@@ -226,6 +259,8 @@ RAG-App/
 ├── run.py                  # Entry point — starts Flask on port 5000
 ├── database.py             # SQLite session & message persistence
 ├── requirements.txt        # Python dependencies
+├── Dockerfile              # Docker image build recipe
+├── .dockerignore           # Files excluded from Docker image
 ├── .env                    # API keys (not committed)
 ├── .gitignore
 ├── README.md
