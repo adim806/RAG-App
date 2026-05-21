@@ -4,6 +4,8 @@ A Retrieval-Augmented Generation (RAG) web application that serves as an
 intelligent assistant for a software engineering team's internal documentation.
 Engineers can ask natural-language questions and receive grounded answers sourced
 exclusively from the company's knowledge base.
+<img width="2555" height="1264" alt="Devmind_1" src="https://github.com/user-attachments/assets/fedf0fb2-6894-41de-a830-ffa3fc5a45a1" />
+
 
 ## Topic & Motivation
 
@@ -40,6 +42,7 @@ User ──▶ Flask Web UI ──▶ POST /api/ask
                       Grounded Answer
 ```
 
+<img width="2549" height="1262" alt="Devmind_3" src="https://github.com/user-attachments/assets/bcb95ed2-551f-4d3f-aa9b-a75092fe873f" />
 | Component | Technology |
 |-----------|-----------|
 | Web framework | Flask 3 |
@@ -161,7 +164,6 @@ Embeddings are generated in **batches of 8** with exponential-backoff retries
   startup; animated thinking dots while waiting for responses.
 - **Error handling** — network and API errors shown inline in the chat.
 - **Responsive design** — sidebar collapses on mobile screens.
-
 ## Installation & Running
 
 ### Option A — Docker (recommended)
