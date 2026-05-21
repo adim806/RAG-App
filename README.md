@@ -43,6 +43,8 @@ User ──▶ Flask Web UI ──▶ POST /api/ask
 ```
 
 <img width="2549" height="1262" alt="Devmind_3" src="https://github.com/user-attachments/assets/bcb95ed2-551f-4d3f-aa9b-a75092fe873f" />
+
+
 | Component | Technology |
 |-----------|-----------|
 | Web framework | Flask 3 |
